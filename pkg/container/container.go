@@ -2,108 +2,159 @@ package container
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"io"
+	"os"
+	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
-	"github.com/jfelipearaujo/testcontainers/pkg/network"
+	"github.com/docker/go-connections/nat"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-// FileData is a type that represents a file data
-type FileData struct {
-	Reader            io.Reader
-	ContainerFilePath string
-	FileMode          int64
-}
-
-// Container is a type that represents a container
+// Container is a type that represents a container that will be created
 type Container struct {
-	Image          string
-	ExposedPorts   []string
-	EnvVars        map[string]string
-	Network        *network.Network
-	BaseFilePath   string
-	Files          []FileData
-	WaitingForLog  string
-	StartupTimeout time.Duration
+	ContainerRequest testcontainers.ContainerRequest
 }
 
 // ContainerOption is a type that represents a container option
 type ContainerOption func(*Container)
 
+// WithDockerfile is a ContainerOption that sets the Dockerfile data of the container
+//
+// Default: nil
+func WithDockerfile(fromDockerFile testcontainers.FromDockerfile) ContainerOption {
+	return func(container *Container) {
+		container.ContainerRequest.FromDockerfile = fromDockerFile
+	}
+}
+
 // WithImage is a ContainerOption that sets the image of the container
+//
+// Default: postgres:latest
 func WithImage(image string) ContainerOption {
 	return func(container *Container) {
-		container.Image = image
+		container.ContainerRequest.Image = image
 	}
 }
 
 // WithExposedPorts is a ContainerOption that sets the exposed ports of the container
+//
+// Default: 5432
 func WithExposedPorts(ports ...string) ContainerOption {
 	return func(container *Container) {
-		container.ExposedPorts = ports
+		container.ContainerRequest.ExposedPorts = ports
 	}
 }
 
 // WithEnvVars is a ContainerOption that sets the environment variables of the container
+//
+// Default:
+//
+//	POSTGRES_DB: postgres_db
+//	POSTGRES_USER: postgres
+//	POSTGRES_PASSWORD: postgres
 func WithEnvVars(envVars map[string]string) ContainerOption {
 	return func(container *Container) {
-		container.EnvVars = envVars
+		container.ContainerRequest.Env = envVars
 	}
 }
 
 // WithNetwork is a ContainerOption that sets the network of the container
-func WithNetwork(network *network.Network) ContainerOption {
+//
+// Default: nil
+func WithNetwork(alias string, network *testcontainers.DockerNetwork) ContainerOption {
 	return func(container *Container) {
-		container.Network = network
+		container.ContainerRequest.Networks = []string{
+			network.Name,
+		}
+		container.ContainerRequest.NetworkAliases = map[string][]string{
+			network.Name: {
+				alias,
+			},
+		}
 	}
 }
 
-// WithBaseContainerFilePath is a ContainerOption that sets the base container file path
-func WithBaseContainerFilePath(baseContainerFilePath string) ContainerOption {
-	return func(container *Container) {
-		container.BaseFilePath = baseContainerFilePath
-	}
-}
+// WithFiles is a ContainerOption that sets the startup files of the container that will be copied to the container
+//
+// Default: nil
+func WithFiles(basePath string, files ...string) ContainerOption {
+	fileData := make([]testcontainers.ContainerFile, len(files))
 
-// WithFiles is a ContainerOption that sets the startup files of the container
-func WithFiles(files ...string) ContainerOption {
-	fileData := make([]FileData, len(files))
+	if len(files) == 0 {
+		panic(fmt.Errorf("files must not be empty"))
+	}
 
 	for i, file := range files {
-		fileData[i] = FileData{
-			Reader:            strings.NewReader(file),
-			ContainerFilePath: file,
+		reader, err := os.Open(file)
+		if err != nil {
+			panic(fmt.Errorf("failed to open file '%s': %w", file, err))
+		}
+		fileData[i] = testcontainers.ContainerFile{
+			Reader:            reader,
+			ContainerFilePath: filepath.Join(basePath, filepath.Base(file)),
 			FileMode:          0644,
 		}
 	}
 
 	return func(container *Container) {
-		container.Files = fileData
+		container.ContainerRequest.Files = fileData
+	}
+}
+
+// WithExecutableFiles is a ContainerOption that sets the executable files of the container that will be copied to the container
+//
+// Default: nil
+func WithExecutableFiles(basePath string, files ...string) ContainerOption {
+	fileData := make([]testcontainers.ContainerFile, len(files))
+
+	if len(files) == 0 {
+		panic(fmt.Errorf("executable files must not be empty"))
+	}
+
+	for i, file := range files {
+		reader, err := os.Open(file)
+		if err != nil {
+			panic(fmt.Errorf("failed to open file '%s': %w", file, err))
+		}
+		fileData[i] = testcontainers.ContainerFile{
+			Reader:            reader,
+			ContainerFilePath: filepath.Join(basePath, filepath.Base(file)),
+			FileMode:          0755,
+		}
+	}
+
+	return func(container *Container) {
+		container.ContainerRequest.Files = fileData
 	}
 }
 
 // WithWaitingForLog is a ContainerOption that sets the log to wait for
-func WithWaitingForLog(log string) ContainerOption {
+//
+// Default: ready for start up
+func WithWaitingForLog(log string, startupTimeout time.Duration) ContainerOption {
 	return func(container *Container) {
-		container.WaitingForLog = log
+		container.ContainerRequest.WaitingFor = wait.ForLog(log).WithStartupTimeout(startupTimeout)
 	}
 }
 
-// WithStartupTimeout is a ContainerOption that sets the startup timeout
-func WithStartupTimeout(timeout time.Duration) ContainerOption {
+// WithWaitingForPort is a ContainerOption that sets the port to wait for
+//
+//	Example: "8080" for 30 seconds
+func WithWaitingForPort(port string, startupTimeout time.Duration) ContainerOption {
 	return func(container *Container) {
-		container.StartupTimeout = timeout
+		container.ContainerRequest.WaitingFor = wait.ForListeningPort(nat.Port(port)).WithStartupTimeout(startupTimeout)
 	}
 }
 
-// NewContainer creates a new container
-func NewContainer(opts ...ContainerOption) *Container {
-	container := &Container{}
+// NewContainerDefinition creates a new container definition that will be used to create a container
+func NewContainerDefinition(opts ...ContainerOption) *Container {
+	container := &Container{
+		ContainerRequest: testcontainers.ContainerRequest{},
+	}
 
 	for _, opt := range opts {
 		opt(container)
@@ -112,48 +163,41 @@ func NewContainer(opts ...ContainerOption) *Container {
 	return container
 }
 
-// Build creates a new container
-func (c *Container) Build(ctx context.Context) (testcontainers.Container, error) {
-	var network *testcontainers.DockerNetwork
-	var err error
-
-	if c.Network != nil {
-		network, err = c.Network.Build(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	files := make([]testcontainers.ContainerFile, len(c.Files))
-
-	for i, file := range c.Files {
-		files[i] = testcontainers.ContainerFile{
-			Reader:            file.Reader,
-			ContainerFilePath: filepath.Join(c.BaseFilePath, file.ContainerFilePath),
-			FileMode:          file.FileMode,
-		}
-	}
-
+// BuildContainer creates a new container following the container definition
+func (c *Container) BuildContainer(ctx context.Context) (testcontainers.Container, error) {
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Image:        c.Image,
-			ExposedPorts: c.ExposedPorts,
-			Env:          c.EnvVars,
-			Networks: []string{
-				network.Name,
-			},
-			NetworkAliases: map[string][]string{
-				network.Name: {
-					c.Network.Alias,
-				},
-			},
-			Files:      files,
-			WaitingFor: wait.ForLog(c.WaitingForLog).WithStartupTimeout(c.StartupTimeout),
-		},
-		Started: true,
+		ContainerRequest: c.ContainerRequest,
+		Started:          true,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create the container: %w", err)
 	}
 	return container, nil
+}
+
+func GetMappedPort(ctx context.Context, container testcontainers.Container, exposedPort nat.Port) (nat.Port, error) {
+	containerID := container.GetContainerID()
+
+	cmd := exec.Command("docker", "inspect", "--format", "{{json .NetworkSettings.Ports}}", containerID)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("failed to execute docker inspect: %s, %v", output, err)
+	}
+
+	var ports nat.PortMap
+	if err = json.Unmarshal(output, &ports); err != nil {
+		return "", fmt.Errorf("failed to parse output: %v", err)
+	}
+
+	port, ok := ports[exposedPort]
+	if !ok {
+		return "", fmt.Errorf("port %s not found", exposedPort)
+	}
+
+	if len(port) == 0 {
+		return "", fmt.Errorf("port %s not found", exposedPort)
+	}
+
+	return nat.Port(port[0].HostPort), nil
 }

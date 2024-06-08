@@ -28,7 +28,7 @@ func WithPaths(paths ...string) TestSuiteOption {
 	}
 }
 
-// WithConcurrency is a TestSuiteOption that sets the concurrency of the test suite
+// WithConcurrency is a TestSuiteOption that sets the concurrency of the test suite. If the concurrency is set to 0, the test suite will NOT run in parallel
 //
 // Default: 4
 func WithConcurrency(concurrency int) TestSuiteOption {

@@ -3,34 +3,15 @@
 # testcontainers
 This is an addon to be used with Testcontainers package and with GoDog
 
-## Installation
-
-```bash
-go get github.com/jfelipearaujo/testcontainers@latest
-```
-
 ## How to use
 
 To use this addon, you need to import the packages in your project:
-```go
+```bash
 import "github.com/jfelipearaujo/testcontainers/pkg/container"
 import "github.com/jfelipearaujo/testcontainers/pkg/network"
 import "github.com/jfelipearaujo/testcontainers/pkg/state"
 import "github.com/jfelipearaujo/testcontainers/pkg/testsuite"
 ```
-
-# Examples
-
-| Example | Description |
-| --- | --- |
-| [Example 01](./examples/example_01/README.md) | Simple BDD test.
-| [Example 02](./examples/example_02/README.md) | Using a Postgres container.
-| [Example 03](./examples/example_03/README.md) | Using aLocalStack container.
-| [Example 04](./examples/example_04/README.md) | Using a MongoDB container.
-| [Example 05](./examples/example_05/README.md) | Custom API running on a container via Dockerfile.
-| [Example 06](./examples/example_06/README.md) | Two containers interacting with each other using a Network.
-
-# Full documentation
 
 # container
 

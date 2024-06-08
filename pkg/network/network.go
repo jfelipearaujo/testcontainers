@@ -21,13 +21,15 @@ type Network struct {
 	Alias string
 	Type  NetworkType
 
-	Instance *testcontainers.DockerNetwork
+	instance *testcontainers.DockerNetwork
 }
 
 // NetworkOption is a type that represents a network option
 type NetworkOption func(*Network)
 
 // WithAlias is a NetworkOption that sets the alias of the network
+//
+// Default: network
 func WithAlias(alias string) NetworkOption {
 	return func(network *Network) {
 		network.Alias = alias
@@ -35,6 +37,8 @@ func WithAlias(alias string) NetworkOption {
 }
 
 // WithType is a NetworkOption that sets the type of the network
+//
+// Default: bridge
 func WithType(typeName NetworkType) NetworkOption {
 	return func(network *Network) {
 		network.Type = typeName
@@ -55,15 +59,10 @@ func NewNetwork(opts ...NetworkOption) *Network {
 	return ntw
 }
 
-// Retrieve retrieves the network instance
-func (ntw *Network) GetInstance() *testcontainers.DockerNetwork {
-	return ntw.Instance
-}
-
-// Build creates a new network
+// Build creates a new DockerNetwork
 func (ntw *Network) Build(ctx context.Context) (*testcontainers.DockerNetwork, error) {
-	if ntw.Instance != nil {
-		return ntw.Instance, nil
+	if ntw.instance != nil {
+		return ntw.instance, nil
 	}
 
 	output, err := tcnetwork.New(ctx, tcnetwork.WithDriver(string(ntw.Type)))
@@ -71,7 +70,7 @@ func (ntw *Network) Build(ctx context.Context) (*testcontainers.DockerNetwork, e
 		return nil, fmt.Errorf("failed to create the network: %w", err)
 	}
 
-	ntw.Instance = output
+	ntw.instance = output
 
 	return output, nil
 }

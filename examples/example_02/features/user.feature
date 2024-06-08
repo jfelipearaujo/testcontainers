@@ -9,21 +9,18 @@ Feature: User management
     When I press "create"
     Then the user should be created
 
-  Scenario: Read an user
-    Given I have an existing user
-    And I have entered "john@example.com" into the user email field
-    When I press "read"
-    Then the user should be read
-
   Scenario: Update an user
-    Given I have an existing user
-    And I have entered "John Doe" into the user name field
+    Given I have entered "John" into the user name field
     And I have entered "john@example.com" into the user email field
+    And I press "create"
+    And I have entered "John Doe" into the user name field
     When I press "update"
     Then the user should be updated
 
   Scenario: Delete an user
-    Given I have an existing user
+    Given I have entered "John" into the user name field
+    And I have entered "john@example.com" into the user email field
+    And I press "create"
     And I have entered "john@example.com" into the user email field
     When I press "delete"
     Then the user should be deleted
