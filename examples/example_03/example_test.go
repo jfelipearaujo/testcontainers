@@ -34,6 +34,10 @@ var testState = state.NewState[test]()
 var containers = container.NewGroup()
 
 func TestFeatures(t *testing.T) {
+	t.Setenv("AWS_ACCESS_KEY_ID", "test")
+	t.Setenv("AWS_SECRET_ACCESS_KEY", "test")
+	t.Setenv("AWS_SESSION_TOKEN", "test")
+
 	testsuite.NewTestSuite(t,
 		initializeScenario,
 		testsuite.WithPaths("features"),

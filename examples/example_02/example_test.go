@@ -180,7 +180,7 @@ func createUser(connStr, name, email string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open connection: %w", err)
 	}
-	defer conn.Close()
+	//defer conn.Close()
 
 	_, err = conn.Exec(
 		"INSERT INTO users (name, email) VALUES ($1, $2);",
@@ -199,7 +199,7 @@ func selectUser(connStr, name, email string) (user, error) {
 	if err != nil {
 		return user, fmt.Errorf("failed to open connection: %w", err)
 	}
-	defer conn.Close()
+	//defer conn.Close()
 
 	rows, err := conn.Query(
 		"SELECT * FROM users WHERE name = $1 AND email = $2",
@@ -227,7 +227,7 @@ func updateUser(connStr, name, email string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open connection: %w", err)
 	}
-	defer conn.Close()
+	//defer conn.Close()
 
 	result, err := conn.Exec("UPDATE users SET name = $1 WHERE email = $2",
 		name,
@@ -250,7 +250,7 @@ func deleteUser(connStr, email string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open connection: %w", err)
 	}
-	defer conn.Close()
+	//defer conn.Close()
 
 	result, err := conn.Exec("DELETE FROM users WHERE email = $1",
 		email)
