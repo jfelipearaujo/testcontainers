@@ -16,7 +16,8 @@ import (
 
 // Container is a type that represents a container that will be created
 type Container struct {
-	ContainerRequest testcontainers.ContainerRequest
+	ContainerRequest  testcontainers.ContainerRequest
+	ForceWaitDuration *time.Duration
 }
 
 // ContainerOption is a type that represents a container option
@@ -150,6 +151,15 @@ func WithWaitingForPort(port string, startupTimeout time.Duration) ContainerOpti
 	}
 }
 
+// WithForceWaitDuration is a ContainerOption that sets the duration to wait for the container to be ready
+//
+//	Default: nil
+func WithForceWaitDuration(duration time.Duration) ContainerOption {
+	return func(container *Container) {
+		container.ForceWaitDuration = &duration
+	}
+}
+
 // NewContainerDefinition creates a new container definition that will be used to create a container
 func NewContainerDefinition(opts ...ContainerOption) *Container {
 	container := &Container{
@@ -172,6 +182,12 @@ func (c *Container) BuildContainer(ctx context.Context) (testcontainers.Containe
 	if err != nil {
 		return nil, fmt.Errorf("failed to create the container: %w", err)
 	}
+
+	if c.ForceWaitDuration != nil {
+		fmt.Printf("Waiting for %s for the container to be ready\n", *c.ForceWaitDuration)
+		time.Sleep(*c.ForceWaitDuration)
+	}
+
 	return container, nil
 }
 

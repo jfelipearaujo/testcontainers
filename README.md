@@ -52,6 +52,7 @@ import "github.com/jfelipearaujo/testcontainers/pkg/container"
   - [func WithExecutableFiles\(basePath string, files ...string\) ContainerOption](<#WithExecutableFiles>)
   - [func WithExposedPorts\(ports ...string\) ContainerOption](<#WithExposedPorts>)
   - [func WithFiles\(basePath string, files ...string\) ContainerOption](<#WithFiles>)
+  - [func WithForceWaitDuration\(duration time.Duration\) ContainerOption](<#WithForceWaitDuration>)
   - [func WithImage\(image string\) ContainerOption](<#WithImage>)
   - [func WithNetwork\(alias string, network \*testcontainers.DockerNetwork\) ContainerOption](<#WithNetwork>)
   - [func WithWaitingForLog\(log string, startupTimeout time.Duration\) ContainerOption](<#WithWaitingForLog>)
@@ -73,7 +74,7 @@ func DestroyGroup(ctx context.Context, group GroupContainer) (context.Context, e
 DestroyGroup destroys the given group of containers and the network \(if exists\)
 
 <a name="GetMappedPort"></a>
-## func [GetMappedPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L178>)
+## func [GetMappedPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L194>)
 
 ```go
 func GetMappedPort(ctx context.Context, container testcontainers.Container, exposedPort nat.Port) (nat.Port, error)
@@ -91,18 +92,19 @@ func NewGroup() map[string]GroupContainer
 NewGroup creates a new map of test contexts to store a group of containers
 
 <a name="Container"></a>
-## type [Container](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L18-L20>)
+## type [Container](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L18-L21>)
 
 Container is a type that represents a container that will be created
 
 ```go
 type Container struct {
-    ContainerRequest testcontainers.ContainerRequest
+    ContainerRequest  testcontainers.ContainerRequest
+    ForceWaitDuration *time.Duration
 }
 ```
 
 <a name="NewContainerDefinition"></a>
-### func [NewContainerDefinition](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L154>)
+### func [NewContainerDefinition](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L164>)
 
 ```go
 func NewContainerDefinition(opts ...ContainerOption) *Container
@@ -111,7 +113,7 @@ func NewContainerDefinition(opts ...ContainerOption) *Container
 NewContainerDefinition creates a new container definition that will be used to create a container
 
 <a name="Container.BuildContainer"></a>
-### func \(\*Container\) [BuildContainer](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L167>)
+### func \(\*Container\) [BuildContainer](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L177>)
 
 ```go
 func (c *Container) BuildContainer(ctx context.Context) (testcontainers.Container, error)
@@ -120,7 +122,7 @@ func (c *Container) BuildContainer(ctx context.Context) (testcontainers.Containe
 BuildContainer creates a new container following the container definition
 
 <a name="ContainerOption"></a>
-## type [ContainerOption](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L23>)
+## type [ContainerOption](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L24>)
 
 ContainerOption is a type that represents a container option
 
@@ -129,7 +131,7 @@ type ContainerOption func(*Container)
 ```
 
 <a name="WithDockerfile"></a>
-### func [WithDockerfile](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L28>)
+### func [WithDockerfile](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L29>)
 
 ```go
 func WithDockerfile(fromDockerFile testcontainers.FromDockerfile) ContainerOption
@@ -140,7 +142,7 @@ WithDockerfile is a ContainerOption that sets the Dockerfile data of the contain
 Default: nil
 
 <a name="WithEnvVars"></a>
-### func [WithEnvVars](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L59>)
+### func [WithEnvVars](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L60>)
 
 ```go
 func WithEnvVars(envVars map[string]string) ContainerOption
@@ -157,7 +159,7 @@ POSTGRES_PASSWORD: postgres
 ```
 
 <a name="WithExecutableFiles"></a>
-### func [WithExecutableFiles](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L111>)
+### func [WithExecutableFiles](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L112>)
 
 ```go
 func WithExecutableFiles(basePath string, files ...string) ContainerOption
@@ -168,7 +170,7 @@ WithExecutableFiles is a ContainerOption that sets the executable files of the c
 Default: nil
 
 <a name="WithExposedPorts"></a>
-### func [WithExposedPorts](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L46>)
+### func [WithExposedPorts](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L47>)
 
 ```go
 func WithExposedPorts(ports ...string) ContainerOption
@@ -179,7 +181,7 @@ WithExposedPorts is a ContainerOption that sets the exposed ports of the contain
 Default: 5432
 
 <a name="WithFiles"></a>
-### func [WithFiles](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L84>)
+### func [WithFiles](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L85>)
 
 ```go
 func WithFiles(basePath string, files ...string) ContainerOption
@@ -189,8 +191,21 @@ WithFiles is a ContainerOption that sets the startup files of the container that
 
 Default: nil
 
+<a name="WithForceWaitDuration"></a>
+### func [WithForceWaitDuration](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L157>)
+
+```go
+func WithForceWaitDuration(duration time.Duration) ContainerOption
+```
+
+WithForceWaitDuration is a ContainerOption that sets the duration to wait for the container to be ready
+
+```
+Default: nil
+```
+
 <a name="WithImage"></a>
-### func [WithImage](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L37>)
+### func [WithImage](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L38>)
 
 ```go
 func WithImage(image string) ContainerOption
@@ -201,7 +216,7 @@ WithImage is a ContainerOption that sets the image of the container
 Default: postgres:latest
 
 <a name="WithNetwork"></a>
-### func [WithNetwork](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L68>)
+### func [WithNetwork](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L69>)
 
 ```go
 func WithNetwork(alias string, network *testcontainers.DockerNetwork) ContainerOption
@@ -212,7 +227,7 @@ WithNetwork is a ContainerOption that sets the network of the container
 Default: nil
 
 <a name="WithWaitingForLog"></a>
-### func [WithWaitingForLog](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L138>)
+### func [WithWaitingForLog](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L139>)
 
 ```go
 func WithWaitingForLog(log string, startupTimeout time.Duration) ContainerOption
@@ -223,7 +238,7 @@ WithWaitingForLog is a ContainerOption that sets the log to wait for
 Default: ready for start up
 
 <a name="WithWaitingForPort"></a>
-### func [WithWaitingForPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L147>)
+### func [WithWaitingForPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L148>)
 
 ```go
 func WithWaitingForPort(port string, startupTimeout time.Duration) ContainerOption

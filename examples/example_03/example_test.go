@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -34,14 +35,10 @@ var testState = state.NewState[test]()
 var containers = container.NewGroup()
 
 func TestFeatures(t *testing.T) {
-	t.Setenv("AWS_ACCESS_KEY_ID", "test")
-	t.Setenv("AWS_SECRET_ACCESS_KEY", "test")
-	t.Setenv("AWS_SESSION_TOKEN", "test")
-
 	testsuite.NewTestSuite(t,
 		initializeScenario,
 		testsuite.WithPaths("features"),
-		testsuite.WithConcurrency(4),
+		testsuite.WithConcurrency(0),
 	)
 }
 
@@ -62,6 +59,7 @@ func initializeScenario(ctx *godog.ScenarioContext) {
 				"./testdata/init-sqs.sh",
 				"./testdata/z-init.sh",
 			),
+			container.WithForceWaitDuration(5*time.Second),
 		)
 
 		localStackContainer, err := definition.BuildContainer(ctx)
