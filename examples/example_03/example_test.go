@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -59,7 +58,6 @@ func initializeScenario(ctx *godog.ScenarioContext) {
 				"./testdata/init-sqs.sh",
 				"./testdata/z-init.sh",
 			),
-			container.WithForceWaitDuration(5*time.Second),
 		)
 
 		localStackContainer, err := definition.BuildContainer(ctx)
@@ -278,21 +276,6 @@ func theMessageShouldBePublishedIntoTheQueue(ctx context.Context) (context.Conte
 func awsCfg(ctx context.Context, endpointURL string) (aws.Config, error) {
 	cfg, err := config.LoadDefaultConfig(ctx,
 		config.WithRegion("us-east-1"),
-		// config.WithEndpointResolverWithOptions(
-		// 	aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-		// 		return aws.Endpoint{
-		// 			SigningRegion: region,
-		// 			URL:           endpointURL,
-		// 		}, nil
-		// 	})),
-		// config.WithCredentialsProvider(
-		// 	aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
-		// 		return aws.Credentials{
-		// 			AccessKeyID:     "dummy",
-		// 			SecretAccessKey: "dummy",
-		// 		}, nil
-		// 	}),
-		// ),
 	)
 	if err != nil {
 		return cfg, fmt.Errorf("failed to load AWS default config: %w", err)

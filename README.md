@@ -597,6 +597,7 @@ import "github.com/jfelipearaujo/testcontainers/pkg/container/localstack"
 - [func WithLocalStackContainer\(\) container.ContainerOption](<#WithLocalStackContainer>)
 - [type LocalStackOption](<#LocalStackOption>)
   - [func WithDebug\(debug string\) LocalStackOption](<#WithDebug>)
+  - [func WithDefaultRegion\(defaultRegion string\) LocalStackOption](<#WithDefaultRegion>)
   - [func WithDockerHost\(dockerHost string\) LocalStackOption](<#WithDockerHost>)
   - [func WithExposedPort\(exposedPort string\) LocalStackOption](<#WithExposedPort>)
 - [type Options](<#Options>)
@@ -608,15 +609,16 @@ import "github.com/jfelipearaujo/testcontainers/pkg/container/localstack"
 
 ```go
 const (
-    BasePath    string = "/etc/localstack/init/ready.d"
-    ExposedPort string = "4566"
-    Debug       string = "false"
-    DockerHost  string = "unix:///var/run/docker.sock"
+    BasePath      string = "/etc/localstack/init/ready.d"
+    ExposedPort   string = "4566"
+    Debug         string = "false"
+    DockerHost    string = "unix:///var/run/docker.sock"
+    DefaultRegion string = "us-east-1"
 )
 ```
 
 <a name="BuildEndpoint"></a>
-## func [BuildEndpoint](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L66>)
+## func [BuildEndpoint](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L78>)
 
 ```go
 func BuildEndpoint(ctx context.Context, container testcontainers.Container, opts ...LocalStackOption) (string, error)
@@ -629,7 +631,7 @@ Example: "http://localhost:4566"
 ```
 
 <a name="WithLocalStackContainer"></a>
-## func [WithLocalStackContainer](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L102>)
+## func [WithLocalStackContainer](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L116>)
 
 ```go
 func WithLocalStackContainer() container.ContainerOption
@@ -644,6 +646,7 @@ ExposedPort: "4566"
 Environment variables:
 	DEBUG: false
 	DOCKER_HOST: "unix:///var/run/docker.sock"
+	DEFAULT_REGION: "us-east-1"
 
 BasePath: "/etc/localstack/init/ready.d"
 WaitingForLog: "Initialization complete!"
@@ -651,7 +654,7 @@ StartupTimeout: "30 seconds"
 ```
 
 <a name="LocalStackOption"></a>
-## type [LocalStackOption](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L34>)
+## type [LocalStackOption](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L37>)
 
 LocalStackOption is a type that represents a LocalStack option
 
@@ -660,7 +663,7 @@ type LocalStackOption func(*Options)
 ```
 
 <a name="WithDebug"></a>
-### func [WithDebug](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L48>)
+### func [WithDebug](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L51>)
 
 ```go
 func WithDebug(debug string) LocalStackOption
@@ -672,8 +675,21 @@ WithDebug is a LocalStackOption that sets the debug of the LocalStack container
 Default: false
 ```
 
+<a name="WithDefaultRegion"></a>
+### func [WithDefaultRegion](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L69>)
+
+```go
+func WithDefaultRegion(defaultRegion string) LocalStackOption
+```
+
+WithDefaultRegion is a LocalStackOption that sets the default region of the LocalStack container
+
+```
+Default: "us-east-1"
+```
+
 <a name="WithDockerHost"></a>
-### func [WithDockerHost](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L57>)
+### func [WithDockerHost](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L60>)
 
 ```go
 func WithDockerHost(dockerHost string) LocalStackOption
@@ -681,10 +697,12 @@ func WithDockerHost(dockerHost string) LocalStackOption
 
 WithDockerHost is a LocalStackOption that sets the Docker host of the LocalStack container
 
-Default: unix:///var/run/docker.sock
+```
+Default: "unix:///var/run/docker.sock"
+```
 
 <a name="WithExposedPort"></a>
-### func [WithExposedPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L39>)
+### func [WithExposedPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L42>)
 
 ```go
 func WithExposedPort(exposedPort string) LocalStackOption
@@ -697,7 +715,7 @@ Default: "4566"
 ```
 
 <a name="Options"></a>
-## type [Options](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L27-L31>)
+## type [Options](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L29-L34>)
 
 Options is a type that represents the options for a LocalStack container
 
@@ -706,13 +724,15 @@ Default options:
 	ExposedPort: "4566"
 	Debug: false
 	DockerHost: "unix:///var/run/docker.sock"
+	DefaultRegion: "us-east-1"
 ```
 
 ```go
 type Options struct {
-    ExposedPort string
-    Debug       string
-    DockerHost  string
+    ExposedPort   string
+    Debug         string
+    DockerHost    string
+    DefaultRegion string
 }
 ```
 
