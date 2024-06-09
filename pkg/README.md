@@ -3,34 +3,15 @@
 # testcontainers
 This is an addon to be used with Testcontainers package and with GoDog
 
-## Installation
-
-```bash
-go get github.com/jfelipearaujo/testcontainers@latest
-```
-
 ## How to use
 
 To use this addon, you need to import the packages in your project:
-```go
+```bash
 import "github.com/jfelipearaujo/testcontainers/pkg/container"
 import "github.com/jfelipearaujo/testcontainers/pkg/network"
 import "github.com/jfelipearaujo/testcontainers/pkg/state"
 import "github.com/jfelipearaujo/testcontainers/pkg/testsuite"
 ```
-
-# Examples
-
-| Example | Description |
-| --- | --- |
-| [Example 01](./examples/example_01/README.md) | Simple BDD test.
-| [Example 02](./examples/example_02/README.md) | Using a Postgres container.
-| [Example 03](./examples/example_03/README.md) | Using aLocalStack container.
-| [Example 04](./examples/example_04/README.md) | Using a MongoDB container.
-| [Example 05](./examples/example_05/README.md) | Custom API running on a container via Dockerfile.
-| [Example 06](./examples/example_06/README.md) | Two containers interacting with each other using a Network.
-
-# Full documentation
 
 # container
 
@@ -52,7 +33,6 @@ import "github.com/jfelipearaujo/testcontainers/pkg/container"
   - [func WithExecutableFiles\(basePath string, files ...string\) ContainerOption](<#WithExecutableFiles>)
   - [func WithExposedPorts\(ports ...string\) ContainerOption](<#WithExposedPorts>)
   - [func WithFiles\(basePath string, files ...string\) ContainerOption](<#WithFiles>)
-  - [func WithForceWaitDuration\(duration time.Duration\) ContainerOption](<#WithForceWaitDuration>)
   - [func WithImage\(image string\) ContainerOption](<#WithImage>)
   - [func WithNetwork\(alias string, network \*testcontainers.DockerNetwork\) ContainerOption](<#WithNetwork>)
   - [func WithWaitingForLog\(log string, startupTimeout time.Duration\) ContainerOption](<#WithWaitingForLog>)
@@ -74,7 +54,7 @@ func DestroyGroup(ctx context.Context, group GroupContainer) (context.Context, e
 DestroyGroup destroys the given group of containers and the network \(if exists\)
 
 <a name="GetMappedPort"></a>
-## func [GetMappedPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L194>)
+## func [GetMappedPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L178>)
 
 ```go
 func GetMappedPort(ctx context.Context, container testcontainers.Container, exposedPort nat.Port) (nat.Port, error)
@@ -92,19 +72,18 @@ func NewGroup() map[string]GroupContainer
 NewGroup creates a new map of test contexts to store a group of containers
 
 <a name="Container"></a>
-## type [Container](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L18-L21>)
+## type [Container](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L18-L20>)
 
 Container is a type that represents a container that will be created
 
 ```go
 type Container struct {
-    ContainerRequest  testcontainers.ContainerRequest
-    ForceWaitDuration *time.Duration
+    ContainerRequest testcontainers.ContainerRequest
 }
 ```
 
 <a name="NewContainerDefinition"></a>
-### func [NewContainerDefinition](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L164>)
+### func [NewContainerDefinition](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L154>)
 
 ```go
 func NewContainerDefinition(opts ...ContainerOption) *Container
@@ -113,7 +92,7 @@ func NewContainerDefinition(opts ...ContainerOption) *Container
 NewContainerDefinition creates a new container definition that will be used to create a container
 
 <a name="Container.BuildContainer"></a>
-### func \(\*Container\) [BuildContainer](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L177>)
+### func \(\*Container\) [BuildContainer](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L167>)
 
 ```go
 func (c *Container) BuildContainer(ctx context.Context) (testcontainers.Container, error)
@@ -122,7 +101,7 @@ func (c *Container) BuildContainer(ctx context.Context) (testcontainers.Containe
 BuildContainer creates a new container following the container definition
 
 <a name="ContainerOption"></a>
-## type [ContainerOption](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L24>)
+## type [ContainerOption](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L23>)
 
 ContainerOption is a type that represents a container option
 
@@ -131,7 +110,7 @@ type ContainerOption func(*Container)
 ```
 
 <a name="WithDockerfile"></a>
-### func [WithDockerfile](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L29>)
+### func [WithDockerfile](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L28>)
 
 ```go
 func WithDockerfile(fromDockerFile testcontainers.FromDockerfile) ContainerOption
@@ -142,7 +121,7 @@ WithDockerfile is a ContainerOption that sets the Dockerfile data of the contain
 Default: nil
 
 <a name="WithEnvVars"></a>
-### func [WithEnvVars](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L60>)
+### func [WithEnvVars](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L59>)
 
 ```go
 func WithEnvVars(envVars map[string]string) ContainerOption
@@ -159,7 +138,7 @@ POSTGRES_PASSWORD: postgres
 ```
 
 <a name="WithExecutableFiles"></a>
-### func [WithExecutableFiles](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L112>)
+### func [WithExecutableFiles](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L111>)
 
 ```go
 func WithExecutableFiles(basePath string, files ...string) ContainerOption
@@ -170,7 +149,7 @@ WithExecutableFiles is a ContainerOption that sets the executable files of the c
 Default: nil
 
 <a name="WithExposedPorts"></a>
-### func [WithExposedPorts](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L47>)
+### func [WithExposedPorts](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L46>)
 
 ```go
 func WithExposedPorts(ports ...string) ContainerOption
@@ -181,7 +160,7 @@ WithExposedPorts is a ContainerOption that sets the exposed ports of the contain
 Default: 5432
 
 <a name="WithFiles"></a>
-### func [WithFiles](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L85>)
+### func [WithFiles](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L84>)
 
 ```go
 func WithFiles(basePath string, files ...string) ContainerOption
@@ -191,21 +170,8 @@ WithFiles is a ContainerOption that sets the startup files of the container that
 
 Default: nil
 
-<a name="WithForceWaitDuration"></a>
-### func [WithForceWaitDuration](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L157>)
-
-```go
-func WithForceWaitDuration(duration time.Duration) ContainerOption
-```
-
-WithForceWaitDuration is a ContainerOption that sets the duration to wait for the container to be ready
-
-```
-Default: nil
-```
-
 <a name="WithImage"></a>
-### func [WithImage](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L38>)
+### func [WithImage](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L37>)
 
 ```go
 func WithImage(image string) ContainerOption
@@ -216,7 +182,7 @@ WithImage is a ContainerOption that sets the image of the container
 Default: postgres:latest
 
 <a name="WithNetwork"></a>
-### func [WithNetwork](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L69>)
+### func [WithNetwork](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L68>)
 
 ```go
 func WithNetwork(alias string, network *testcontainers.DockerNetwork) ContainerOption
@@ -227,7 +193,7 @@ WithNetwork is a ContainerOption that sets the network of the container
 Default: nil
 
 <a name="WithWaitingForLog"></a>
-### func [WithWaitingForLog](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L139>)
+### func [WithWaitingForLog](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L138>)
 
 ```go
 func WithWaitingForLog(log string, startupTimeout time.Duration) ContainerOption
@@ -238,7 +204,7 @@ WithWaitingForLog is a ContainerOption that sets the log to wait for
 Default: ready for start up
 
 <a name="WithWaitingForPort"></a>
-### func [WithWaitingForPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L148>)
+### func [WithWaitingForPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/container.go#L147>)
 
 ```go
 func WithWaitingForPort(port string, startupTimeout time.Duration) ContainerOption
@@ -597,7 +563,6 @@ import "github.com/jfelipearaujo/testcontainers/pkg/container/localstack"
 - [func WithLocalStackContainer\(\) container.ContainerOption](<#WithLocalStackContainer>)
 - [type LocalStackOption](<#LocalStackOption>)
   - [func WithDebug\(debug string\) LocalStackOption](<#WithDebug>)
-  - [func WithDefaultRegion\(defaultRegion string\) LocalStackOption](<#WithDefaultRegion>)
   - [func WithDockerHost\(dockerHost string\) LocalStackOption](<#WithDockerHost>)
   - [func WithExposedPort\(exposedPort string\) LocalStackOption](<#WithExposedPort>)
 - [type Options](<#Options>)
@@ -609,16 +574,15 @@ import "github.com/jfelipearaujo/testcontainers/pkg/container/localstack"
 
 ```go
 const (
-    BasePath      string = "/etc/localstack/init/ready.d"
-    ExposedPort   string = "4566"
-    Debug         string = "false"
-    DockerHost    string = "unix:///var/run/docker.sock"
-    DefaultRegion string = "us-east-1"
+    BasePath    string = "/etc/localstack/init/ready.d"
+    ExposedPort string = "4566"
+    Debug       string = "false"
+    DockerHost  string = "unix:///var/run/docker.sock"
 )
 ```
 
 <a name="BuildEndpoint"></a>
-## func [BuildEndpoint](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L78>)
+## func [BuildEndpoint](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L66>)
 
 ```go
 func BuildEndpoint(ctx context.Context, container testcontainers.Container, opts ...LocalStackOption) (string, error)
@@ -631,7 +595,7 @@ Example: "http://localhost:4566"
 ```
 
 <a name="WithLocalStackContainer"></a>
-## func [WithLocalStackContainer](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L116>)
+## func [WithLocalStackContainer](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L102>)
 
 ```go
 func WithLocalStackContainer() container.ContainerOption
@@ -646,7 +610,6 @@ ExposedPort: "4566"
 Environment variables:
 	DEBUG: false
 	DOCKER_HOST: "unix:///var/run/docker.sock"
-	DEFAULT_REGION: "us-east-1"
 
 BasePath: "/etc/localstack/init/ready.d"
 WaitingForLog: "Initialization complete!"
@@ -654,7 +617,7 @@ StartupTimeout: "30 seconds"
 ```
 
 <a name="LocalStackOption"></a>
-## type [LocalStackOption](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L37>)
+## type [LocalStackOption](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L34>)
 
 LocalStackOption is a type that represents a LocalStack option
 
@@ -663,7 +626,7 @@ type LocalStackOption func(*Options)
 ```
 
 <a name="WithDebug"></a>
-### func [WithDebug](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L51>)
+### func [WithDebug](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L48>)
 
 ```go
 func WithDebug(debug string) LocalStackOption
@@ -675,21 +638,8 @@ WithDebug is a LocalStackOption that sets the debug of the LocalStack container
 Default: false
 ```
 
-<a name="WithDefaultRegion"></a>
-### func [WithDefaultRegion](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L69>)
-
-```go
-func WithDefaultRegion(defaultRegion string) LocalStackOption
-```
-
-WithDefaultRegion is a LocalStackOption that sets the default region of the LocalStack container
-
-```
-Default: "us-east-1"
-```
-
 <a name="WithDockerHost"></a>
-### func [WithDockerHost](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L60>)
+### func [WithDockerHost](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L57>)
 
 ```go
 func WithDockerHost(dockerHost string) LocalStackOption
@@ -697,12 +647,10 @@ func WithDockerHost(dockerHost string) LocalStackOption
 
 WithDockerHost is a LocalStackOption that sets the Docker host of the LocalStack container
 
-```
-Default: "unix:///var/run/docker.sock"
-```
+Default: unix:///var/run/docker.sock
 
 <a name="WithExposedPort"></a>
-### func [WithExposedPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L42>)
+### func [WithExposedPort](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L39>)
 
 ```go
 func WithExposedPort(exposedPort string) LocalStackOption
@@ -715,7 +663,7 @@ Default: "4566"
 ```
 
 <a name="Options"></a>
-## type [Options](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L29-L34>)
+## type [Options](<https://github.com/jfelipearaujo/testcontainers/blob/main/pkg/container/localstack/localstack.go#L27-L31>)
 
 Options is a type that represents the options for a LocalStack container
 
@@ -724,15 +672,13 @@ Default options:
 	ExposedPort: "4566"
 	Debug: false
 	DockerHost: "unix:///var/run/docker.sock"
-	DefaultRegion: "us-east-1"
 ```
 
 ```go
 type Options struct {
-    ExposedPort   string
-    Debug         string
-    DockerHost    string
-    DefaultRegion string
+    ExposedPort string
+    Debug       string
+    DockerHost  string
 }
 ```
 
