@@ -101,7 +101,7 @@ func initializeScenario(ctx *godog.ScenarioContext) {
 func iHaveAnSNSTopicNamed(ctx context.Context, topicName string) (context.Context, error) {
 	currentState := testState.Retrieve(ctx)
 
-	cloudConfig, err := config.LoadDefaultConfig(ctx)
+	cloudConfig, err := awsCfg(ctx, currentState.awsEndpoint)
 	if err != nil {
 		return ctx, fmt.Errorf("failed to load AWS default config: %w", err)
 	}
@@ -137,7 +137,7 @@ func iHaveAnSNSTopicNamed(ctx context.Context, topicName string) (context.Contex
 func iHaveAnSQSQueueNamed(ctx context.Context, queueName string) (context.Context, error) {
 	currentState := testState.Retrieve(ctx)
 
-	cloudConfig, err := config.LoadDefaultConfig(ctx)
+	cloudConfig, err := awsCfg(ctx, currentState.awsEndpoint)
 	if err != nil {
 		return ctx, fmt.Errorf("failed to load AWS default config: %w", err)
 	}
@@ -173,7 +173,7 @@ func iHaveAnSQSQueueNamed(ctx context.Context, queueName string) (context.Contex
 func iPublishAMessageIntoTheTopic(ctx context.Context) (context.Context, error) {
 	currentState := testState.Retrieve(ctx)
 
-	cloudConfig, err := config.LoadDefaultConfig(ctx)
+	cloudConfig, err := awsCfg(ctx, currentState.awsEndpoint)
 	if err != nil {
 		return ctx, fmt.Errorf("failed to load AWS default config: %w", err)
 	}
@@ -198,7 +198,7 @@ func iPublishAMessageIntoTheTopic(ctx context.Context) (context.Context, error) 
 func iPublishAMessageIntoTheQueue(ctx context.Context) (context.Context, error) {
 	currentState := testState.Retrieve(ctx)
 
-	cloudConfig, err := config.LoadDefaultConfig(ctx)
+	cloudConfig, err := awsCfg(ctx, currentState.awsEndpoint)
 	if err != nil {
 		return ctx, fmt.Errorf("failed to load AWS default config: %w", err)
 	}
@@ -223,7 +223,7 @@ func iPublishAMessageIntoTheQueue(ctx context.Context) (context.Context, error) 
 func iReadTheMessagesFromTheQueue(ctx context.Context) (context.Context, error) {
 	currentState := testState.Retrieve(ctx)
 
-	cloudConfig, err := config.LoadDefaultConfig(ctx)
+	cloudConfig, err := awsCfg(ctx, currentState.awsEndpoint)
 	if err != nil {
 		return ctx, fmt.Errorf("failed to load AWS default config: %w", err)
 	}
@@ -273,4 +273,30 @@ func theMessageShouldBePublishedIntoTheQueue(ctx context.Context) (context.Conte
 	}
 
 	return ctx, nil
+}
+
+func awsCfg(ctx context.Context, endpointURL string) (aws.Config, error) {
+	cfg, err := config.LoadDefaultConfig(ctx,
+		config.WithRegion("us-east-1"),
+		// config.WithEndpointResolverWithOptions(
+		// 	aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+		// 		return aws.Endpoint{
+		// 			SigningRegion: region,
+		// 			URL:           endpointURL,
+		// 		}, nil
+		// 	})),
+		// config.WithCredentialsProvider(
+		// 	aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
+		// 		return aws.Credentials{
+		// 			AccessKeyID:     "dummy",
+		// 			SecretAccessKey: "dummy",
+		// 		}, nil
+		// 	}),
+		// ),
+	)
+	if err != nil {
+		return cfg, fmt.Errorf("failed to load AWS default config: %w", err)
+	}
+	cfg.BaseEndpoint = &endpointURL
+	return cfg, nil
 }

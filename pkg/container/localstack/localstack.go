@@ -12,10 +12,11 @@ import (
 )
 
 const (
-	BasePath    string = "/etc/localstack/init/ready.d"
-	ExposedPort string = "4566"
-	Debug       string = "false"
-	DockerHost  string = "unix:///var/run/docker.sock"
+	BasePath      string = "/etc/localstack/init/ready.d"
+	ExposedPort   string = "4566"
+	Debug         string = "false"
+	DockerHost    string = "unix:///var/run/docker.sock"
+	DefaultRegion string = "us-east-1"
 )
 
 // Options is a type that represents the options for a LocalStack container
@@ -24,10 +25,12 @@ const (
 //		ExposedPort: "4566"
 //		Debug: false
 //		DockerHost: "unix:///var/run/docker.sock"
+//		DefaultRegion: "us-east-1"
 type Options struct {
-	ExposedPort string
-	Debug       string
-	DockerHost  string
+	ExposedPort   string
+	Debug         string
+	DockerHost    string
+	DefaultRegion string
 }
 
 // LocalStackOption is a type that represents a LocalStack option
@@ -53,10 +56,19 @@ func WithDebug(debug string) LocalStackOption {
 
 // WithDockerHost is a LocalStackOption that sets the Docker host of the LocalStack container
 //
-// Default: unix:///var/run/docker.sock
+//	Default: "unix:///var/run/docker.sock"
 func WithDockerHost(dockerHost string) LocalStackOption {
 	return func(options *Options) {
 		options.DockerHost = dockerHost
+	}
+}
+
+// WithDefaultRegion is a LocalStackOption that sets the default region of the LocalStack container
+//
+//	Default: "us-east-1"
+func WithDefaultRegion(defaultRegion string) LocalStackOption {
+	return func(options *Options) {
+		options.DefaultRegion = defaultRegion
 	}
 }
 
@@ -65,9 +77,10 @@ func WithDockerHost(dockerHost string) LocalStackOption {
 //	Example: "http://localhost:4566"
 func BuildEndpoint(ctx context.Context, container testcontainers.Container, opts ...LocalStackOption) (string, error) {
 	options := &Options{
-		ExposedPort: ExposedPort,
-		Debug:       Debug,
-		DockerHost:  DockerHost,
+		ExposedPort:   ExposedPort,
+		Debug:         Debug,
+		DockerHost:    DockerHost,
+		DefaultRegion: DefaultRegion,
 	}
 
 	for _, o := range opts {
@@ -95,6 +108,7 @@ func BuildEndpoint(ctx context.Context, container testcontainers.Container, opts
 //	Environment variables:
 //		DEBUG: false
 //		DOCKER_HOST: "unix:///var/run/docker.sock"
+//		DEFAULT_REGION: "us-east-1"
 //
 //	BasePath: "/etc/localstack/init/ready.d"
 //	WaitingForLog: "Initialization complete!"
@@ -106,8 +120,9 @@ func WithLocalStackContainer() container.ContainerOption {
 			ExposedPort,
 		}
 		container.ContainerRequest.Env = map[string]string{
-			"DEBUG":       Debug,
-			"DOCKER_HOST": DockerHost,
+			"DEBUG":          Debug,
+			"DOCKER_HOST":    DockerHost,
+			"DEFAULT_REGION": DefaultRegion,
 		}
 		container.ContainerRequest.WaitingFor = wait.
 			ForLog("Initialization complete!").
