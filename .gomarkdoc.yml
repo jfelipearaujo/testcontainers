@@ -1,5 +1,8 @@
 output: "{{.Dir}}/README.md"
 header: |-
+  [![version](https://img.shields.io/github/v/release/jfelipearaujo/testcontainers.svg)](https://github.com/jfelipearaujo/testcontainers/releases/latest)
+  [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/jfelipearaujo/testcontainers#section-readme)
+  [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jfelipearaujo/testcontainers/blob/main/LICENSE)
   # testcontainers
   This is an addon to be used with Testcontainers package and with GoDog
 
