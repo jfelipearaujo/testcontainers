@@ -2,6 +2,10 @@ name: tests
 on:
   workflow_dispatch:
   push:
+    paths:
+      - '**.go'
+      - go.sum
+      - go.mod
     branches:
       - main
   pull_request:
