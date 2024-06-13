@@ -7,6 +7,7 @@ import (
 
 	"github.com/docker/go-connections/nat"
 	"github.com/jfelipearaujo/testcontainers/pkg/container"
+	"github.com/jfelipearaujo/testcontainers/pkg/network"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -24,9 +25,10 @@ const (
 //		User: "mongo"
 //		Pass: "mongo"
 type Options struct {
-	ExposedPort string
-	User        string
-	Pass        string
+	ExposedPort  string
+	User         string
+	Pass         string
+	NetworkAlias *string
 }
 
 // MongoOption is a type that represents a MongoDB option
@@ -59,10 +61,43 @@ func WithPass(pass string) MongoOption {
 	}
 }
 
-// Return a MongoDB connection string for the given container with default options
+// WithNetwork is a MongoOption that sets the network alias of the MongoDB container
+//
+//	Default: nil
+func WithNetwork(network *network.Network) MongoOption {
+	return func(options *Options) {
+		options.NetworkAlias = &network.Alias
+	}
+}
+
+// Return a MongoDB connection string for the given container with default options when the container is in a network
+//
+//	Example: "mongodb://mongo:mongo@network_alias:27017/"
+func BuildInternalConnectionString(ctx context.Context, container testcontainers.Container, opts ...MongoOption) (string, error) {
+	options := &Options{
+		ExposedPort: ExposedPort,
+		User:        User,
+		Pass:        Pass,
+	}
+
+	for _, o := range opts {
+		o(options)
+	}
+
+	if options.NetworkAlias == nil {
+		return "", fmt.Errorf("the container is not in a network")
+	}
+
+	host := *options.NetworkAlias
+	mappedPort := nat.Port(options.ExposedPort)
+
+	return fmt.Sprintf("mongodb://%s:%s@%s:%s/", options.User, options.Pass, host, mappedPort.Port()), nil
+}
+
+// Return a MongoDB connection string for the given container with default options when the container is NOT in a network
 //
 //	Example: "mongodb://mongo:mongo@localhost:27017/"
-func BuildConnectionString(ctx context.Context, container testcontainers.Container, opts ...MongoOption) (string, error) {
+func BuildExternalConnectionString(ctx context.Context, container testcontainers.Container, opts ...MongoOption) (string, error) {
 	options := &Options{
 		ExposedPort: ExposedPort,
 		User:        User,

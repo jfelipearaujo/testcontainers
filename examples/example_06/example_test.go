@@ -67,7 +67,7 @@ func initializeScenario(ctx *godog.ScenarioContext) {
 			return ctx, err
 		}
 
-		connString, err := postgres.BuildConnectionString(ctx, pgContainer, postgres.WithNetwork(ntwrkDefinition))
+		connString, err := postgres.BuildInternalConnectionString(ctx, pgContainer, postgres.WithNetwork(ntwrkDefinition))
 		if err != nil {
 			return ctx, err
 		}

@@ -58,7 +58,7 @@ func initializeScenario(ctx *godog.ScenarioContext) {
 			return ctx, err
 		}
 
-		connectionString, err := postgres.BuildConnectionString(ctx, pgContainer)
+		connectionString, err := postgres.BuildExternalConnectionString(ctx, pgContainer)
 		if err != nil {
 			return ctx, err
 		}

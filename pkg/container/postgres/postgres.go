@@ -85,12 +85,35 @@ func WithNetwork(network *network.Network) PostgresOption {
 	}
 }
 
-// Return a PostgreSQL connection string for the given container with default options
+// Return a PostgreSQL connection string for the given container with default options when the container is in a network
+//
+//	Example: "postgres://postgres:postgres@network_alias:5432/postgres_db?sslmode=disable"
+func BuildInternalConnectionString(ctx context.Context, container testcontainers.Container, opts ...PostgresOption) (string, error) {
+	options := &Options{
+		ExposedPort: ExposedPort,
+		Database:    Database,
+		User:        User,
+		Pass:        Pass,
+	}
+
+	for _, o := range opts {
+		o(options)
+	}
+
+	if options.NetworkAlias == nil {
+		return "", fmt.Errorf("the container is not in a network")
+	}
+
+	host := *options.NetworkAlias
+	mappedPort := nat.Port(options.ExposedPort)
+
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", options.User, options.Pass, host, mappedPort.Port(), options.Database), nil
+}
+
+// Return a PostgreSQL connection string for the given container with default options when the container is NOT in a network
 //
 //	Example: "postgres://postgres:postgres@localhost:5432/postgres_db?sslmode=disable"
-func BuildConnectionString(ctx context.Context, container testcontainers.Container, opts ...PostgresOption) (string, error) {
-	var err error
-
+func BuildExternalConnectionString(ctx context.Context, container testcontainers.Container, opts ...PostgresOption) (string, error) {
 	options := &Options{
 		ExposedPort: ExposedPort,
 		Database:    Database,
@@ -103,23 +126,13 @@ func BuildConnectionString(ctx context.Context, container testcontainers.Contain
 		return "", fmt.Errorf("failed to get the host: %w", err)
 	}
 
-	var mappedPort nat.Port
-
-	mappedPort, err = container.MappedPort(ctx, nat.Port(options.ExposedPort))
+	mappedPort, err := container.MappedPort(ctx, nat.Port(options.ExposedPort))
 	if err != nil {
 		return "", fmt.Errorf("failed to get the mapped port: %w", err)
 	}
 
 	for _, o := range opts {
 		o(options)
-	}
-
-	if options.NetworkAlias != nil {
-		// changed the host to be the network alias
-		host = *options.NetworkAlias
-
-		// changed the mapped port to be the exposed port, allowing the connection to be made between the containers
-		mappedPort = nat.Port(options.ExposedPort)
 	}
 
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", options.User, options.Pass, host, mappedPort.Port(), options.Database), nil
