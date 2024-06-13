@@ -58,7 +58,7 @@ func initializeScenario(ctx *godog.ScenarioContext) {
 			return ctx, err
 		}
 
-		connectionString, err := mongodb.BuildConnectionString(ctx, mongoContainer)
+		connectionString, err := mongodb.BuildExternalConnectionString(ctx, mongoContainer)
 		if err != nil {
 			return ctx, err
 		}
